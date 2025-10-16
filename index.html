@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clicker Heroes — Plagiat honteux</title>
+  <link rel="stylesheet" href="style.css" />
+  <script type="module" src="./main.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="title">Clicker Heroes — Plagiat honteux</div>
+      </div>
+      <div class="row" role="group" aria-label="Commandes rapides">
+        <button id="pauseBtn" class="btn-ghost">⏸️ Pause</button>
+        <button id="resetBtn" class="btn-danger">🔁 Réinitialiser</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card config" id="panelConfig" aria-labelledby="cfgTitle">
+        <h2 id="cfgTitle">Configuration</h2>
+        <div class="stack">
+          <div class="row">
+            <label>Héros :</label>
+            <div class="hero-options">
+              <button class="heroBtn active" data-hero="rapide">⚡ Rapide (1 dmg / clic)</button>
+              <button class="heroBtn" data-hero="fort">🚀 Fort (3 dmg / clic)</button>
+            </div>
+          </div>
+          <div class="row">
+            <label for="difficulty">Difficulté :</label>
+            <select id="difficulty">
+              <option value="easy">Facile</option>
+              <option value="normal" selected>Normal</option>
+              <option value="hard">Difficile</option>
+            </select>
+          </div>
+          <div class="row">
+            <button id="startBtn" class="btn-primary" disabled>🚀 Lancer la partie</button>
+          </div>
+
+          <div class="stack" aria-live="polite">
+            <div class="stat"><span>Score courant</span><strong><span id="score">0</span></strong></div>
+            <div class="stat"><span>Meilleur score</span><strong><span id="bestScore">0</span></strong></div>
+            <div class="stat"><span>Niveau</span><strong><span id="level">1</span></strong></div>
+            <div class="row"><button id="clearBest" class="btn-ghost">Effacer le meilleur score</button></div>
+          </div>
+
+          <small>Astuce : tu peux mettre le jeu en pause avec <span class="kbd">P</span>.<br>Tout se passe sur cette page.<br>Aucun rechargement n'est nécessaire.</small>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Jeu</h2>
+        <div class="game-area">
+          <div id="gameHost" aria-label="Zone de jeu">
+            <span>En attente de la configuration.</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      Projet pédagogique — Programmation évènementielle (JS + Pixi.js)
+    </footer>
+  </div>
+</body>
+</html>
