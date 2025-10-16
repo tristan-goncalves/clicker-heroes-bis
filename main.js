@@ -1,8 +1,6 @@
 import * as PIXI from 'pixi.js';
 
-// =============================
-// ⚙️ ÉTAT GLOBAL DU JEU
-// =============================
+// ÉTAT GLOBAL DU JEU
 const state = {
   app: null,
   hero: null,
@@ -19,9 +17,7 @@ const state = {
   scoreLabel: null,
 };
 
-// =============================
-// 🧩 UTILITAIRES
-// =============================
+// UTILITAIRES
 const byId = (id) => document.getElementById(id);
 const scoreEl = byId('score');
 const bestScoreEl = byId('bestScore');
@@ -57,9 +53,7 @@ function saveBestScore() {
   updateHUD();
 }
 
-// =============================
-// 🏁 PHASE D'INITIALISATION
-// =============================
+// PHASE D'INITIALISATION
 document.querySelectorAll('.heroBtn').forEach(btn => {
   btn.addEventListener('click', () => {
     state.hero = btn.dataset.hero;
@@ -77,21 +71,19 @@ startBtn.addEventListener('click', () => {
   startGame();
 });
 
-// =============================
-// 🎮 DÉMARRAGE DU JEU (Pixi v8)
-// =============================
+// DÉMARRAGE DU JEU (Pixi v8)
 function startGame() {
   // Nettoyer le conteneur du jeu
   host.innerHTML = '';
 
-  // ✅ Création de l'application Pixi.js (v7)
+  // Création de l'application Pixi.js (v7)
   const app = new PIXI.Application({
     resizeTo: host,
     backgroundColor: 0xf3f4f6, // couleur de fond gris clair
     antialias: true,
   });
 
-  // ✅ Ajout du canvas Pixi au DOM
+  // Ajout du canvas Pixi au DOM
   host.appendChild(app.view);
   state.app = app;
 
@@ -185,13 +177,11 @@ function startGame() {
 
   centerEnemy();
   window.addEventListener('keydown', onKeyDown);
-  pauseBtn.textContent = '⏸️ Pause P';
+  pauseBtn.textContent = '⏸️ Pause';
 }
 
 
-// =============================
-// 🧠 TEXTES PIXI
-// =============================
+// TEXTES PIXI
 function updateTextLabels() {
   if (!state.hpLabel || !state.lvlLabel || !state.scoreLabel) return;
   state.hpLabel.text = `PV :  ${Math.max(0, state.enemyHP)} / ${state.enemyMaxHP}`;
@@ -238,9 +228,7 @@ function animateLabelZoom(label, {
   requestAnimationFrame(animate);
 }
 
-// =============================
-// 🎨 DESSIN DE L’ENNEMI
-// =============================
+// DESSIN DE L’ENNEMI
 function drawEnemy(g, radius = 80) {
   const app = state.app;
   if (!app) return;
@@ -271,9 +259,8 @@ function centerEnemy() {
   positionTextLabels();
 }
 
-// =============================
-// ⏸️ PAUSE / RESET
-// =============================
+
+// PAUSE / RESET
 function onKeyDown(e) {
   if (e.key.toLowerCase() === 'p') togglePause();
 }
@@ -306,9 +293,7 @@ function flash(el, color = '#6ee7ff') {
   ], { duration: 450, easing: 'ease-out' });
 }
 
-// =============================
-// 🎛️ BOUTONS D’INTERFACE
-// =============================
+// BOUTONS D’INTERFACE
 pauseBtn.addEventListener('click', togglePause);
 resetBtn.addEventListener('click', () => { resetGame(); flash(host, '#ef4444'); });
 clearBestBtn.addEventListener('click', () => {

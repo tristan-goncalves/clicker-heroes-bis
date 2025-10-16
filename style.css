@@ -179,12 +179,12 @@ button:hover {
 }
 
 .stat strong {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .game-area {
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: 18px;
 }
 
 #gameHost {
@@ -194,7 +194,7 @@ button:hover {
   aspect-ratio: auto;
   background: #ebe9e5;
   border: 2px dashed rgba(107,114,128,0.3);
-  border-radius: 16px;
+  border-radius: 10px;
   display: grid;
   place-items: center;
 }
@@ -204,7 +204,7 @@ button:hover {
   background: #f6f5f3;
   border: 1px solid #dbd8d1;
   padding: 2px 6px;
-  border-radius: 6px;
+  border-radius: 5px;
   color: var(--muted);
 }
 
