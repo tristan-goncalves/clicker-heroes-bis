@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Clicker Heroes — Plagiat honteux</title>
   <link rel="stylesheet" href="style.css" />
-  <script type="module" src="./main.js"></script>
+  <script type="module" src="./js/main.js"></script>
 </head>
 <body>
   <div class="wrap">
@@ -26,9 +26,15 @@
         <div class="stack">
           <div class="row">
             <label>Héros :</label>
-            <div class="hero-options">
-              <button class="heroBtn active" data-hero="rapide">⚡ Rapide (1 dmg / clic)</button>
-              <button class="heroBtn" data-hero="fort">🚀 Fort (3 dmg / clic)</button>
+            <div class="hero-select">
+              <div class="hero-card" data-hero="rapide">
+                <img src="./img/Pink_Monster_Attack1_4.png" alt="Héros rapide" />
+                <span>🪻 Violet</span>
+              </div>
+              <div class="hero-card" data-hero="fort">
+                <img src="./img/Owlet_Monster_Attack1_4.png" alt="Héros fort" />
+                <span>☁️ Gris</span>
+              </div>
             </div>
           </div>
           <div class="row">

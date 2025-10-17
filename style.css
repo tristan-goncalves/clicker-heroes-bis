@@ -160,6 +160,56 @@ button:hover {
   box-shadow: 0 3px 6px rgba(245, 158, 11, 0.3);
 }
 
+.hero-select {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+}
+
+.hero-card {
+  background: #f3f4f6;
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: 2px solid transparent;
+}
+
+.hero-card:hover {
+  background: #e5e7eb;
+  transform: translateY(-2px);
+}
+
+.hero-card.active {
+  border-color: #f59e0b;
+  box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+  background: linear-gradient(135deg, #ff9f0a, #fbbf24);
+  color: white;
+}
+
+.hero-card img {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated; /* si tu veux garder le style rétro */
+  margin-bottom: 6px;
+}
+
+.hero-card span {
+  font-weight: 600;
+}
+
+.hero-card canvas.hero-canvas {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+  margin-bottom: 6px;
+}
+
 /* Empêche la carte de config de se comprimer */
 .card.config { min-width: 360px; }
 
@@ -197,6 +247,59 @@ button:hover {
   border-radius: 10px;
   display: grid;
   place-items: center;
+}
+
+.btn-shop {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 5;
+}
+
+#shopBtn {
+  display: none;
+}
+
+.shop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.shop.hidden { display: none; }
+
+.shop-content {
+  background: var(--panel);
+  padding: 20px 30px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  width: 400px;
+  text-align: center;
+}
+
+.shop-item {
+  display: block;
+  margin: 10px auto;
+  padding: 10px;
+  width: 100%;
+  border-radius: 10px;
+  background: #f3f4f6;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.shop-item:hover {
+  background: #e5e7eb;
 }
 
 .kbd {
