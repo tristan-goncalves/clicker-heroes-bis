@@ -17,6 +17,8 @@ Affronte des ennemis toujours plus résistants, améliore tes dégâts et déblo
 
 - Gestion du score
 
+- Choix de difficulté (plus de PV par niveau)
+
 # Installation & lancement
 
 🔧 Prérequis

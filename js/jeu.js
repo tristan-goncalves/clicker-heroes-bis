@@ -16,6 +16,7 @@ function hpForLevel(level, difficulty) {
   const perLevelPercent = 0.10;
   const hp = baseHP + (level - 1) * perLevelFlat;
   const scaled = hp * Math.pow(1 + perLevelPercent, level - 1);
+  // Plus la difficulté est élevée, plus le scaling de PV des mobs est haut
   const mult = difficulty === 'easy' ? 0.8 : difficulty === 'hard' ? 1.6 : 1.0;
   return Math.round(scaled * mult);
 }
