@@ -116,7 +116,6 @@ button:hover {
   color: var(--text);
 }
 
-/* Lignes de configuration : grille 2 colonnes (label | contrôle) */
 .form-row {
   display: grid;
   grid-template-columns: max-content 1fr;
@@ -130,7 +129,6 @@ button:hover {
   white-space: nowrap;
 }
 
-/* Boutons héros : grille responsive à 2 colonnes */
 .hero-options {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -148,7 +146,7 @@ button:hover {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 140px; /* évite les boutons écrasés */
+  min-width: 140px;
 }
 
 .hero-btn:hover { background: #e5e7eb; }
@@ -195,7 +193,7 @@ button:hover {
 .hero-card img {
   width: 64px;
   height: 64px;
-  image-rendering: pixelated; /* si tu veux garder le style rétro */
+  image-rendering: pixelated;
   margin-bottom: 6px;
 }
 
@@ -210,10 +208,8 @@ button:hover {
   margin-bottom: 6px;
 }
 
-/* Empêche la carte de config de se comprimer */
 .card.config { min-width: 360px; }
 
-/* Sur petits écrans, repasse les boutons sur 1 colonne */
 @media (max-width: 480px) {
   .hero-options { grid-template-columns: 1fr; }
   .card.config { min-width: auto; }

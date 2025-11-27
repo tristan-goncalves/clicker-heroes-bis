@@ -1,17 +1,15 @@
-// jeu.js
 import * as PIXI from 'pixi.js';
 import { state, updateHUD, saveBestScore, flash } from './configuration.js';
 import { createShopUI } from './boutique.js';
 
-/* =============================
-   MÉCANIQUES DE BASE
-   ============================= */
+
+// Dégâts de base du joueur
 function dmgPerClick() {
   const base = 1;
   return base + state.upgrades.weaponBonus;
 }
 
-// Scaling PV : +5/niveau + 10% cumulatif (par niveau)
+// Scaling PV des mobs : +5/niveau + 10% cumulatif (par niveau)
 function hpForLevel(level, difficulty) {
   const baseHP = 20;
   const perLevelFlat = 5;
@@ -22,9 +20,7 @@ function hpForLevel(level, difficulty) {
   return Math.round(scaled * mult);
 }
 
-/* =============================
-   API EXPORTÉE
-   ============================= */
+// Initialisation du jeu
 export function startGame(host) {
   if (state.app) {
     try { state.app.destroy(true, { children: true }); } catch {}
@@ -40,7 +36,7 @@ export function startGame(host) {
   host.appendChild(app.view);
   state.app = app;
 
-  // Réinit partie
+  // Réinitialisation de la partie
   state.score = 0;
   state.gold = 0;
   state.level = 1;
@@ -51,9 +47,8 @@ export function startGame(host) {
   state.lastHemorrhageTime = 0;
   updateHUD();
 
-  /* =============================
-     ENNEMI + CONTAINER CENTRÉ
-     ============================= */
+
+  // Mob (centré dans un container)
   const enemyContainer = new PIXI.Container();
   enemyContainer.x = app.renderer.width / 2;
   enemyContainer.y = app.renderer.height / 2;
@@ -62,12 +57,12 @@ export function startGame(host) {
   drawEnemy(g);
   enemyContainer.addChild(g);
 
-  // Cercle de charge (progression 0→100%)
+  // Le cercle de charge
   const chargeRing = new PIXI.Graphics();
   chargeRing.alpha = 0;
   enemyContainer.addChild(chargeRing);
 
-  // Halo doré (double or)
+  // Le halo doré (passif du double fric)
   const goldRing = new PIXI.Graphics();
   goldRing.alpha = 0;
   enemyContainer.addChild(goldRing);
@@ -79,9 +74,6 @@ export function startGame(host) {
   enemyContainer.scale.set(state.enemy.baseScale);
   app.stage.addChild(enemyContainer);
 
-  /* =============================
-     VARIABLES / UTILS CHARGE
-     ============================= */
   let isCharging = false;
   let charged = false;
   let chargeStartTime = 0;
@@ -91,10 +83,10 @@ export function startGame(host) {
     chargeRing.clear();
     const color = charged ? 0xf59e0b : 0x3b82f6; // orange si prêt, bleu sinon
 
-    // Rayon auto basé sur l'ennemi dessiné
+    // Rayon basé sur l'ennemi dessiné
     const enemyGraphic = state.enemy.children[0];
     const baseRadius = enemyGraphic?.geometry?.graphicsData?.[0]?.shape?.radius || 80;
-    const radius = baseRadius + 40; // halo autour
+    const radius = baseRadius + 40; // halo autour du mob
 
     chargeRing.lineStyle(baseRadius * 0.5, color, 0.9);
     chargeRing.arc(0, 0, radius, -Math.PI / 2, -Math.PI / 2 + progress * Math.PI * 2);
@@ -113,7 +105,7 @@ export function startGame(host) {
     if (state.lvlLabel) state.lvlLabel.tint = 0x333333;
   }
 
-  // Halo doré lors d’un double gain d’or
+  // Halo doré lors d’un double gain de fric
   function showGoldRing() {
     goldRing.clear();
     goldRing.lineStyle(4, 0xfacc15, 0.95);
@@ -132,12 +124,12 @@ export function startGame(host) {
     requestAnimationFrame(fade);
   }
 
-  // Appliquer des dégâts + gains score/or + gestion mort & HUD
+  // Appliquer des dégâts + gains score/or
   function applyDamage(amount) {
     state.enemyHP -= amount;
     state.score += amount;
 
-    // Gain d'or avec chance de doubler (pioche diamant)
+    // Gain d'or avec chance de doubler (bonus de la pioche en diamant)
     let goldGain = amount;
     if (state.upgrades.doubleGoldChance && Math.random() < state.upgrades.doubleGoldChance) {
       goldGain *= 2;
@@ -160,9 +152,7 @@ export function startGame(host) {
     updateTextLabels();
   }
 
-  /* =============================
-     INTERACTIONS ENNEMI
-     ============================= */
+  // Intéraction avec le mob
   enemyContainer.on('pointerdown', () => {
     if (state.isPaused) return;
 
@@ -171,7 +161,7 @@ export function startGame(host) {
       const dmg = dmgPerClick();
       applyDamage(dmg);
 
-      // Feedback
+      // Indication visuelle lors d'une intéraction avec le mob
       enemyContainer.scale.set(state.enemy.baseScale * 0.98);
       setTimeout(() => enemyContainer.scale.set(state.enemy.baseScale), 80);
       animateLabelZoom(state.scoreLabel, { endScale: 1.3, duration: 250 });
@@ -189,7 +179,7 @@ export function startGame(host) {
       return;
     }
 
-    // Bonus actif débloqué => charge
+    // Bonus actif de la charge débloqué
     isCharging = true;
     charged = false;
     chargeStartTime = performance.now();
@@ -203,13 +193,13 @@ export function startGame(host) {
     if (!isCharging) return;
 
     if (charged) {
-      // Coup chargé : x5
+      // Coup chargé : x5 de dégats
       const dmg = dmgPerClick() * 5;
       applyDamage(dmg);
       flash(host, '#f59e0b');
       animateLabelZoom(state.scoreLabel, { endScale: 1.6, duration: 350 });
 
-      // Passif “-2% / 15 clics” → compte 5 clics
+      // Passif “-2% / 15 clics” → va compter 5 clics
       if (state.upgrades.passiveBonus) {
         state.clicksSincePassive += 5;
         if (state.clicksSincePassive >= 15) {
@@ -220,7 +210,7 @@ export function startGame(host) {
         }
       }
     } else {
-      // Relâché avant les 2s → clic normal
+      // Si l'on relâche avant les 2s → clic normal
       const dmg = dmgPerClick();
       applyDamage(dmg);
       enemyContainer.scale.set(state.enemy.baseScale * 0.98);
@@ -244,9 +234,7 @@ export function startGame(host) {
     cancelCharge();
   });
 
-  /* =============================
-     TEXTES / HUD PIXI
-     ============================= */
+  // Gestion du canvas Pixi
   const textStyle = new PIXI.TextStyle({
     fontFamily: 'Arial',
     fontSize: 18,
@@ -258,7 +246,7 @@ export function startGame(host) {
   const lvlLabel = new PIXI.Text('', textStyle);
   const scoreLabel = new PIXI.Text('Score : 0', { ...textStyle, fill: 0x007bff });
 
-  // === Label d'or (icône + montant) en haut à droite ===
+  // Label d'or (icône + montant) en haut à droite du canvas
   const goldContainer = new PIXI.Container();
 
   const goldTexture = PIXI.Texture.from('./img/gold.png');
@@ -280,30 +268,28 @@ export function startGame(host) {
 
   goldContainer.addChild(goldIcon, goldText);
 
-  // Assignation au state
   state.hpLabel = hpLabel;
   state.lvlLabel = lvlLabel;
   state.scoreLabel = scoreLabel;
-  state.goldLabel = goldText;        // le texte seulement (pour update)
+  state.goldLabel = goldText;
   state.goldContainer = goldContainer;
 
   [hpLabel, lvlLabel, scoreLabel].forEach(t => t.anchor.set(0.5));
   app.stage.addChild(hpLabel, lvlLabel, scoreLabel, goldContainer);
 
-  // === BOUTIQUE (UI Pixi)
+  // Rajout de la boutique sur le canvas
   createShopUI(app);
 
   updateTextLabels();
   centerEnemy();
 
-  /* =============================
-     BOUCLE PRINCIPALE
-     ============================= */
+
+  // Boucle principale du jeu
   app.ticker.add(() => {
     if (state.isPaused) return;
 
     const t = app.ticker.lastTime / 1000;
-    const k = 10 + 6 * Math.sin(t * 2); // respiration visuelle
+    const k = 10 + 6 * Math.sin(t * 2);
     drawEnemy(g, k);
     positionTextLabels();
 
@@ -319,7 +305,7 @@ export function startGame(host) {
       }
     }
 
-    // Hémorragie (si dague achetée)
+    // Gestion de l'hémorragie (si la dague a été achetée)
     if (state.upgrades.hemorrhage) {
       const now = performance.now();
       if (!state.lastHemorrhageTime) state.lastHemorrhageTime = 0;
@@ -331,10 +317,10 @@ export function startGame(host) {
         state.score += bleedDamage;
         state.gold += bleedDamage;
 
-        // Petit flash rouge
+        // Petit flash rouge de bleed
         flash(host, '#ef4444');
 
-        // Mort ?
+        // Mort du mob
         if (state.enemyHP <= 0) {
           state.level++;
           state.enemyMaxHP = hpForLevel(state.level, state.difficulty);
@@ -352,9 +338,7 @@ export function startGame(host) {
   });
 }
 
-/* =============================
-   CONTROLES GLOBAUX
-   ============================= */
+// Contrôles (pause et reprendre)
 export function togglePause(pauseBtn) {
   state.isPaused = !state.isPaused;
   if (pauseBtn) {
@@ -376,9 +360,7 @@ export function resetGame(host, pauseBtn) {
   if (pauseBtn) pauseBtn.textContent = '⏸️ Pause';
 }
 
-/* =============================
-   TEXTE & ANIMS
-   ============================= */
+// Gestion des labels
 function updateTextLabels() {
   if (!state.hpLabel) return;
   state.hpLabel.text = `PV : ${Math.max(0, state.enemyHP)} / ${state.enemyMaxHP}`;
@@ -397,7 +379,7 @@ function positionTextLabels() {
   state.scoreLabel.x = width / 2;
   state.scoreLabel.y = 40;
 
-  // Label or en haut à droite (marge 100px droite, 50px haut)
+  // Label de l'or en haut à droite
   state.goldContainer.x = width - 100;
   state.goldContainer.y = 50;
 }
@@ -415,9 +397,7 @@ function animateLabelZoom(label, { startScale = 1, endScale = 1.3, duration = 25
   requestAnimationFrame(tick);
 }
 
-/* =============================
-   ENNEMI (dessin + recentrage)
-   ============================= */
+// Dessin de l'ennemi et centrage sur le canvas
 function drawEnemy(g, radius = 120) {
   g.clear();
   g.beginFill(0xf87171);

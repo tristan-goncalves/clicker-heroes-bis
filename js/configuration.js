@@ -1,8 +1,6 @@
 import { startGame, togglePause, resetGame } from './jeu.js';
 
-/* =============================
-   ÉTAT GLOBAL DU JEU
-   ============================= */
+// Etat du jeu
 export const state = {
   hero: null,
   difficulty: 'normal',
@@ -22,9 +20,7 @@ export const state = {
   isPaused: false,
 };
 
-/* =============================
-   MISE À JOUR DU HUD
-   ============================= */
+// Gestion de l'update de l'HUD
 export function updateHUD() {
   const scoreEl = document.getElementById('score');
   const bestEl = document.getElementById('bestScore');
@@ -38,9 +34,7 @@ export function updateHUD() {
   if (levelEl) levelEl.textContent = state.level;
 }
 
-/* =============================
-   SAUVEGARDE DU SCORE
-   ============================= */
+// Sauvegarde du score
 export function saveBestScore() {
   const best = localStorage.getItem('bestScore') || 0;
   if (state.score > best) {
@@ -48,9 +42,7 @@ export function saveBestScore() {
   }
 }
 
-/* =============================
-   ANIMATION HÉROS (spritesheet)
-   ============================= */
+// Animation de nos deux héros de départ (Violet & Gris)
 function animateSprite(canvas, imagePath, frameWidth, frameHeight, frameCount, frameSpeed = 120) {
   const ctx = canvas.getContext('2d');
   const image = new Image();
@@ -75,9 +67,7 @@ function animateSprite(canvas, imagePath, frameWidth, frameHeight, frameCount, f
   };
 }
 
-/* =============================
-   INITIALISATION DE LA CONFIG
-   ============================= */
+// Initialisation de la config
 document.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('startBtn');
   const resetBtn = document.getElementById('resetBtn');
@@ -86,11 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const difficultySelect = document.getElementById('difficulty');
   const panelConfig = document.getElementById('panelConfig');
 
-  if (!startBtn || !panelConfig) return; // sécurité
+  if (!startBtn || !panelConfig) return;
 
-  /* =============================
-     GESTION DES BOUTONS
-     ============================= */
+  // Gestion du clic sur les différents boutons
   startBtn.addEventListener('click', () => {
     if (state.hero && state.difficulty) {
       startGame(gameArea);
@@ -103,14 +91,12 @@ document.addEventListener('DOMContentLoaded', () => {
     state.difficulty = e.target.value;
   });
 
-  /* =============================
-     SÉLECTION DU HÉROS
-     ============================= */
+  // Sélection du héros
   const heroCards = document.querySelectorAll('.hero-card');
   heroCards.forEach(card => {
     const hero = card.dataset.hero;
 
-    // === Animation continue du héros ===
+    // Animation en continu du héros
     const canvas = document.createElement('canvas');
     canvas.classList.add('hero-canvas');
     card.querySelector('img').replaceWith(canvas);
@@ -121,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
       animateSprite(canvas, './img/Owlet_Monster_Attack1_4.png', 32, 32, 4, 150);
     }
 
-    // === Sélection du héros ===
+    // Sélection du héros
     card.addEventListener('click', () => {
       heroCards.forEach(c => c.classList.remove('active'));
       card.classList.add('active');
@@ -131,9 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-/* =============================
-   EFFET FLASH COULEUR (utile HUD)
-   ============================= */
+// Gestion du flash lors d'un évènement (bonus ou autre)
 export function flash(element, color = '#fff', duration = 150) {
   const prev = element.style.backgroundColor;
   element.style.transition = 'background-color 0.15s ease';

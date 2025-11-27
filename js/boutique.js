@@ -1,10 +1,7 @@
-// boutique.js
 import * as PIXI from 'pixi.js';
 import { state, flash } from './configuration.js';
 
-/* =============================
-   BOUTIQUE PIXI
-   ============================= */
+// Boutique PIXI
 export function createShopUI(app) {
   function setBoughtVisual(buyBg, buyText, w = 90, h = 30) {
     buyBg.clear();
@@ -18,7 +15,7 @@ export function createShopUI(app) {
     buyBg.tint = 0xFFFFFF;
   }
 
-  // === BOUTON "BOUTIQUE" ===
+  // Bouton de la boutique
   const buttonContainer = new PIXI.Container();
   const buttonWidth = 130;
   const buttonHeight = 40;
@@ -63,7 +60,7 @@ export function createShopUI(app) {
   buttonContainer.on('pointerdown', () => setButtonColor(clickColor));
   buttonContainer.on('pointerup', () => setButtonColor(hoverColor));
 
-  // === FENÊTRE DE LA BOUTIQUE ===
+  // Fenêtre de la boutique
   const shopContainer = new PIXI.Container();
   shopContainer.visible = false;
 
@@ -78,7 +75,7 @@ export function createShopUI(app) {
   });
   shopContainer.addChild(shopTitle);
 
-  // === ONGLETS ===
+  // Les deux onglets de la boutique (Armes, Bonus)
   const tabs = ['Armes', 'Bonus'];
   let activeTab = 'Armes';
   const tabButtons = {};
@@ -116,7 +113,7 @@ export function createShopUI(app) {
     shopContainer.addChild(tab);
   });
 
-  // === ZONE SCROLLABLE ===
+  // Zone scrollable de la boutique
   const scrollArea = new PIXI.Container();
   const maskArea = new PIXI.Graphics();
   const scrollContent = new PIXI.Container();
@@ -125,7 +122,7 @@ export function createShopUI(app) {
   scrollArea.mask = maskArea;
   shopContainer.addChild(maskArea, scrollArea);
 
-  // === CONTENU DYNAMIQUE ===
+  // Le contenu de boutique (Armes, Bonus)
   function populateTabContent(type) {
     scrollContent.removeChildren();
 
@@ -135,7 +132,7 @@ export function createShopUI(app) {
           { name: 'Dague de vampire', desc: '+1 dégât, Hémorragie (+1 dégât / 2s)', cost: 80, image: 'dague_vampire.png', effect: () => { state.upgrades.weaponBonus += 1; state.upgrades.hemorrhage = true; } },
           { name: 'Mattraque enragée', desc: '+4 dégâts par clic', cost: 120, image: 'mattraque_enragee.png', effect: () => (state.upgrades.weaponBonus += 4) },
           { name: 'Pioche en diamant', desc: "+2 dégâts, 10% de doubler le gain d'or", cost: 200, image: 'pioche_en_diamant.png', effect: () => { state.upgrades.weaponBonus += 2; state.upgrades.doubleGoldChance = 0.1; } },
-          { name: 'Marteau de Smough', desc: '+10 dégâts par clic', cost: 250, image: 'marteau_de_smough.png', effect: () => (state.upgrades.weaponBonus += 10) },
+          { name: 'Marteau de Smough', desc: '+10 dégâts par clic', cost: 800, image: 'marteau_de_smough.png', effect: () => (state.upgrades.weaponBonus += 10) },
         ]
       : [
           { name: 'Passif  —  Brûlure', desc: '-2 % PV / 15 clics (min 1 de dégât)', cost: 100, image: 'brulure.png', effect: () => (state.upgrades.passiveBonus = true) },
@@ -151,7 +148,7 @@ export function createShopUI(app) {
       itemBox.endFill();
       itemBox.y = i * 100;
 
-      // === IMAGE DE L’ITEM ===
+      // Image de l'item
       const texturePath = `./img/${item.image}`;
       let itemImage;
 
@@ -172,7 +169,7 @@ export function createShopUI(app) {
         itemImage = placeholder;
       }
 
-      // === TEXTES ===
+      // Configuration des textes de la boutique
       const nameText = new PIXI.Text(item.name, {
         fontFamily: 'Arial',
         fontSize: 17,
@@ -190,7 +187,7 @@ export function createShopUI(app) {
       descText.x = 100;
       descText.y = 45;
 
-      // === PRIX AVEC ICÔNE DE PIÈCE ===
+      // Gestion du prix des items
       const costContainer = new PIXI.Container();
       
       // Texte du montant
@@ -205,20 +202,16 @@ export function createShopUI(app) {
       // Icône de pièce
       const coinTexture = PIXI.Texture.from('./img/gold.png');
       const coinSprite = new PIXI.Sprite(coinTexture);
-      coinSprite.width = 20;  // adapte selon la taille de ton image
+      coinSprite.width = 20;
       coinSprite.height = 20;
-      coinSprite.x = costText.x + 8; // petit espace entre le texte et la pièce
+      coinSprite.x = costText.x + 8;
       coinSprite.y = costText.y + 5;
-      
-      // Ajout au container
       costContainer.addChild(costText, coinSprite);
-      
-      // Positionnement global du prix
       costContainer.x = 460;
       costContainer.y = 15;
 
 
-      // === BOUTON ACHETER ===
+      // Bouton "ACHETER"
       const buyBg = new PIXI.Graphics();
       buyBg.beginFill(0xffffff);
       buyBg.lineStyle(2, 0x10b981);
@@ -266,7 +259,6 @@ export function createShopUI(app) {
         });
       }
 
-      // === AJOUT À LA BOX ===
       itemBox.addChild(itemImage, nameText, descText, costContainer, buyContainer);
       scrollContent.addChild(itemBox);
     });
@@ -285,7 +277,7 @@ export function createShopUI(app) {
 
   updateTabDisplay();
 
-  // === SCROLL LOGIQUE ===
+  // Gestion du scroll
   let scrollOffset = 0;
   const scrollSpeed = 40;
 
@@ -311,7 +303,7 @@ export function createShopUI(app) {
     }
   });
 
-  // === FERMER ===
+  // Bouton "FERMER" de la boutique
   const closeShop = new PIXI.Container();
   const closeWidth = 90;
   const closeHeight = 32;
@@ -359,7 +351,7 @@ export function createShopUI(app) {
   });
   shopContainer.addChild(closeShop);
 
-  // === POSITIONNEMENT AUTO ===
+  // Centrer la boutique
   function centerShop() {
     const { width, height } = app.renderer;
     const shopWidth = Math.min(600, width * 0.9);
@@ -402,7 +394,7 @@ export function createShopUI(app) {
   });
   app.renderer.on('resize', centerShop);
 
-  // === AJOUT AU STAGE ===
+  // Ajout de la boutique
   app.stage.addChild(buttonContainer, shopContainer);
   state.shopButton = buttonContainer;
   state.shopContainer = shopContainer;
