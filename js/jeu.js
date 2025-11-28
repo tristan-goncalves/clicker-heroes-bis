@@ -3,26 +3,85 @@ import { state, updateHUD, saveBestScore, flash } from './configuration.js';
 import { createShopUI } from './boutique.js';
 
 
+const enemySprites = [
+  { path: './img/enemies/rattata.png', frames: 101 },
+  { path: './img/enemies/piafabec.png', frames: 61 },
+  { path: './img/enemies/abo.png', frames: 71 },
+  { path: './img/enemies/nidoran_f.png', frames: 89 },
+  { path: './img/enemies/nosferapti.png', frames: 54 },
+  { path: './img/enemies/taupiqueur.png', frames: 108 },
+  { path: './img/enemies/racaillou.png', frames: 103 },
+  { path: './img/enemies/magneti.png', frames: 105 },
+  { path: './img/enemies/voltorbe.png', frames: 71 },
+  { path: './img/enemies/saquedeneu.png', frames: 63 },
+  { path: './img/enemies/hypotrempe.png', frames: 80 },
+  { path: './img/enemies/tygnon.png', frames: 81 },
+  { path: './img/enemies/rhinoferos.png', frames: 96 },
+  { path: './img/enemies/lokhlass.png', frames: 65 },
+  { path: './img/enemies/voltali.png', frames: 99 },
+  { path: './img/enemies/artikodin.png', frames: 51 },
+  { path: './img/enemies/electhor.png', frames: 17 },
+  { path: './img/enemies/sulfura.png', frames: 53 },
+  { path: './img/enemies/lugia.png', frames: 16 },
+  { path: './img/enemies/kyogre.png', frames: 38 },
+];
+
 // Dégâts de base du joueur
 function dmgPerClick() {
   const base = 1;
   return base + state.upgrades.weaponBonus;
 }
 
-// Scaling PV des mobs : +5/niveau + 10% cumulatif (par niveau)
+// Effets visuels des différents anneaux autour de l'ennemi
+function createEffectRings() {
+  const chargeRing = new PIXI.Graphics();
+  chargeRing.alpha = 0;
+
+  const goldRing = new PIXI.Graphics();
+  goldRing.alpha = 0;
+
+  state.chargeRing = chargeRing;
+  state.goldRing = goldRing;
+
+  return { chargeRing, goldRing };
+}
+
+// Gestion de la barre de vie de l'ennemi
+function addHealthBar(container) {
+  const barWidth = 100;
+  const barHeight = 12;
+  const offsetY = 60;
+  const bg = new PIXI.Graphics();
+  bg.beginFill(0xcccccc); // Fond (gris)
+  bg.drawRect(-barWidth / 2, offsetY, barWidth, barHeight);
+  bg.endFill();
+  container.addChild(bg);
+
+  const fill = new PIXI.Graphics();
+  fill.beginFill(0x10b981); // Remplissage (vert)
+  fill.drawRect(-barWidth / 2, offsetY, barWidth, barHeight);
+  fill.endFill();
+  container.addChild(fill);
+
+  // Stocker dans le state
+  state.healthBarFill = fill;
+  state.healthBarWidth = barWidth;
+}
+
+// Scaling PV des Pokémons : +5/niveau + 10% cumulatif (par niveau)
 function hpForLevel(level, difficulty) {
   const baseHP = 20;
   const perLevelFlat = 5;
   const perLevelPercent = 0.10;
   const hp = baseHP + (level - 1) * perLevelFlat;
   const scaled = hp * Math.pow(1 + perLevelPercent, level - 1);
-  // Plus la difficulté est élevée, plus le scaling de PV des mobs est haut
+  // Plus la difficulté est élevée, plus le scaling de PV des Pokémons est haut
   const mult = difficulty === 'easy' ? 0.8 : difficulty === 'hard' ? 1.6 : 1.0;
   return Math.round(scaled * mult);
 }
 
 // Initialisation du jeu
-export function startGame(host) {
+export async function startGame(host) {
   if (state.app) {
     try { state.app.destroy(true, { children: true }); } catch {}
     state.app = null;
@@ -30,9 +89,11 @@ export function startGame(host) {
   host.innerHTML = '';
 
   const app = new PIXI.Application({
-    resizeTo: host,
+    width: host.clientWidth,
+    height: host.clientHeight,
     backgroundColor: 0xf3f4f6,
     antialias: true,
+    autoDensity: true,
   });
   host.appendChild(app.view);
   state.app = app;
@@ -49,24 +110,22 @@ export function startGame(host) {
   updateHUD();
 
 
-  // Mob (centré dans un container)
+  // Pokémon (centré dans un container)
   const enemyContainer = new PIXI.Container();
   enemyContainer.x = app.renderer.width / 2;
   enemyContainer.y = app.renderer.height / 2;
 
-  const g = new PIXI.Graphics();
-  drawEnemy(g);
-  enemyContainer.addChild(g);
+  const spriteData = enemySprites[(state.level - 1) % enemySprites.length];
 
-  // Le cercle de charge
-  const chargeRing = new PIXI.Graphics();
-  chargeRing.alpha = 0;
-  enemyContainer.addChild(chargeRing);
+  let { chargeRing, goldRing } = createEffectRings();
 
-  // Le halo doré (passif du double fric)
-  const goldRing = new PIXI.Graphics();
-  goldRing.alpha = 0;
-  enemyContainer.addChild(goldRing);
+  await createAnimatedEnemySprite(spriteData).then(sprite => {
+    state.enemySprite = sprite;
+    enemyContainer.addChild(sprite);
+    enemyContainer.addChild(chargeRing);
+    enemyContainer.addChild(goldRing);
+    addHealthBar(enemyContainer);
+  });
 
   enemyContainer.interactive = true;
   enemyContainer.buttonMode = true;
@@ -82,14 +141,14 @@ export function startGame(host) {
 
   function updateChargeRing(progress) {
     chargeRing.clear();
-    const color = charged ? 0xf59e0b : 0x3b82f6; // orange si prêt, bleu sinon
+    const color = charged ? 0xf59e0b : 0x3b82f6;
 
-    // Rayon basé sur l'ennemi dessiné
-    const enemyGraphic = state.enemy.children[0];
-    const baseRadius = enemyGraphic?.geometry?.graphicsData?.[0]?.shape?.radius || 80;
-    const radius = baseRadius + 40; // halo autour du mob
+    const enemyGraphic = state.enemySprite;
+    const spriteHeight = (enemyGraphic && enemyGraphic.height) || 100;
+    const baseRadius = spriteHeight / 2;
+    const radius = baseRadius + 20;
 
-    chargeRing.lineStyle(baseRadius * 0.5, color, 0.9);
+    chargeRing.lineStyle(baseRadius * 0.1, color, 0.9);
     chargeRing.arc(0, 0, radius, -Math.PI / 2, -Math.PI / 2 + progress * Math.PI * 2);
   }
 
@@ -109,19 +168,26 @@ export function startGame(host) {
   // Halo doré lors d’un double gain de fric
   function showGoldRing() {
     goldRing.clear();
+
+    const enemyGraphic = state.enemySprite;
+    const spriteHeight = (enemyGraphic && enemyGraphic.height) || 100;
+    const baseRadius = spriteHeight / 2;
+
     goldRing.lineStyle(4, 0xfacc15, 0.95);
-    goldRing.drawCircle(0, 0, 50);
+    goldRing.drawCircle(0, 0, baseRadius + 20);
     goldRing.endFill();
     goldRing.alpha = 1;
 
     const start = performance.now();
     const duration = 500;
+
     function fade(time) {
       const p = (time - start) / duration;
       goldRing.alpha = Math.max(0, 1 - p);
       if (p < 1) requestAnimationFrame(fade);
       else goldRing.clear();
     }
+
     requestAnimationFrame(fade);
   }
 
@@ -147,13 +213,36 @@ export function startGame(host) {
       animateLabelZoom(state.lvlLabel, { endScale: 1.4, duration: 300 });
       state.lvlLabel.tint = 0x10b981;
       setTimeout(() => (state.lvlLabel.tint = 0x333333), 300);
+
+      // Remplace l'ancien sprite par le nouveau
+      const spriteData = enemySprites[(state.level - 1) % enemySprites.length];
+      createAnimatedEnemySprite(spriteData).then(sprite => {
+        state.enemy.removeChildren();
+
+        ({ chargeRing, goldRing } = createEffectRings());
+
+        state.enemySprite = sprite;
+        state.enemy.addChild(sprite);
+        state.enemy.addChild(chargeRing);
+        state.enemy.addChild(goldRing);
+
+        addHealthBar(state.enemy);
+      });
+    }
+
+    if (state.healthBarFill) {
+      const ratio = Math.max(0, state.enemyHP / state.enemyMaxHP);
+      state.healthBarFill.clear();
+      state.healthBarFill.beginFill(0x10b981);
+      state.healthBarFill.drawRect(-state.healthBarWidth / 2, 60, state.healthBarWidth * ratio, 12);
+      state.healthBarFill.endFill();
     }
 
     updateHUD();
     updateTextLabels();
   }
 
-  // Intéraction avec le mob
+  // Intéraction avec le Pokémon
   enemyContainer.on('pointerdown', () => {
     if (state.isPaused) return;
 
@@ -162,7 +251,7 @@ export function startGame(host) {
       const dmg = dmgPerClick();
       applyDamage(dmg);
 
-      // Indication visuelle lors d'une intéraction avec le mob
+      // Indication visuelle lors d'une intéraction avec le Pokémon
       enemyContainer.scale.set(state.enemy.baseScale * 0.98);
       setTimeout(() => enemyContainer.scale.set(state.enemy.baseScale), 80);
       animateLabelZoom(state.scoreLabel, { endScale: 1.3, duration: 250 });
@@ -282,7 +371,7 @@ export function startGame(host) {
   createShopUI(app);
 
   updateTextLabels();
-  centerEnemy();
+  //centerEnemy();
 
 
   // Boucle principale du jeu
@@ -291,7 +380,7 @@ export function startGame(host) {
 
     const t = app.ticker.lastTime / 1000;
     const k = 10 + 6 * Math.sin(t * 2);
-    drawEnemy(g, k);
+    //drawEnemy(g, k);
     positionTextLabels();
 
     // Progression visuelle de la charge
@@ -321,7 +410,7 @@ export function startGame(host) {
         // Petit flash rouge de bleed
         flash(host, '#ef4444');
 
-        // Mort du mob
+        // Mort du Pokémon
         if (state.enemyHP <= 0) {
           state.level++;
           state.enemyMaxHP = hpForLevel(state.level, state.difficulty);
@@ -374,9 +463,9 @@ function positionTextLabels() {
   if (!state.app) return;
   const { width, height } = state.app.renderer;
   state.hpLabel.x = width / 2;
-  state.hpLabel.y = height / 2 + 100;
+  state.hpLabel.y = height / 2 + 200;
   state.lvlLabel.x = width / 2;
-  state.lvlLabel.y = height / 2 - 100;
+  state.lvlLabel.y = height / 2 - 150;
   state.scoreLabel.x = width / 2;
   state.scoreLabel.y = 40;
 
@@ -398,17 +487,46 @@ function animateLabelZoom(label, { startScale = 1, endScale = 1.3, duration = 25
   requestAnimationFrame(tick);
 }
 
-// Dessin de l'ennemi et centrage sur le canvas
-function drawEnemy(g, radius = 120) {
-  g.clear();
-  g.beginFill(0xf87171);
-  g.drawCircle(0, 0, radius); // centré sur (0,0)
-  g.endFill();
+// // Dessin de l'ennemi et centrage sur le canvas
+// function drawEnemy(g, radius = 120) {
+//   g.clear();
+//   g.beginFill(0xf87171);
+//   g.drawCircle(0, 0, radius); // centré sur (0,0)
+//   g.endFill();
 
-  const pct = Math.max(0, state.enemyHP) / state.enemyMaxHP;
-  g.lineStyle(8, 0x10b981, 1);
-  g.arc(0, 0, radius + 14, -Math.PI / 2, -Math.PI / 2 + pct * Math.PI * 2);
+//   const pct = Math.max(0, state.enemyHP) / state.enemyMaxHP;
+//   g.lineStyle(8, 0x10b981, 1);
+//   g.arc(0, 0, radius + 14, -Math.PI / 2, -Math.PI / 2 + pct * Math.PI * 2);
+// }
+
+function createAnimatedEnemySprite({ path, frames }) {
+  const texture = PIXI.Texture.from(path);
+  const baseTexture = texture.baseTexture;
+
+  return new Promise((resolve) => {
+    baseTexture.on('loaded', () => {
+      const frameWidth = baseTexture.width / frames;
+      const frameHeight = baseTexture.height;
+
+      const textures = [];
+      for (let i = 0; i < frames; i++) {
+        textures.push(new PIXI.Texture(baseTexture, new PIXI.Rectangle(i * frameWidth, 0, frameWidth, frameHeight)));
+      }
+
+      const sprite = new PIXI.AnimatedSprite(textures);
+      sprite.animationSpeed = 0.15;
+      sprite.anchor.set(0.5);
+      sprite.play();
+
+      // Adapte la taille automatiquement
+      const scale = Math.min(1.5, 100 / frameHeight);
+      sprite.scale.set(scale);
+
+      resolve(sprite);
+    });
+  });
 }
+
 
 function centerEnemy() {
   if (!state.app || !state.enemy) return;

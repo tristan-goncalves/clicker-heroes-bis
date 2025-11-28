@@ -235,14 +235,17 @@ button:hover {
 
 #gameHost {
   width: 100%;
-  min-height: 500px;
-  min-width: 700px;
-  aspect-ratio: auto;
+  height: 100%;
+  max-height: 600px;
+  min-height: 600px;
   background: #ebe9e5;
   border: 2px dashed rgba(107,114,128,0.3);
   border-radius: 10px;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
 }
 
 .btn-shop {
@@ -313,3 +316,19 @@ footer {
   padding: 1rem;
   color: #555;
 }
+
+canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+#gameHost canvas {
+  max-width: 100%;
+  max-height: 100%;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  display: block;
+}
+

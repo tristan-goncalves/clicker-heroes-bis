@@ -1,6 +1,6 @@
 # Clicker Heroes - Plagiat Honteux
 
-Un jeu de cookie clicker, développer en JavaScript avec la bibliothèque Pixi.js.
+Un jeu de Cookie Clicker x Pokémon, développer en JavaScript avec la bibliothèque Pixi.js.
 Affronte des ennemis toujours plus résistants, améliore tes dégâts et débloque des compétences. Jusqu'où iras-tu ?
 
 # Fonctionnalités principales
@@ -18,6 +18,8 @@ Affronte des ennemis toujours plus résistants, améliore tes dégâts et déblo
 - Gestion du score
 
 - Choix de difficulté (plus de PV par niveau)
+
+- Différents Pokémons à affronter
 
 # Installation & lancement
 
