@@ -214,7 +214,7 @@ export async function startGame(host) {
       state.lvlLabel.tint = 0x10b981;
       setTimeout(() => (state.lvlLabel.tint = 0x333333), 300);
 
-      // Remplace l'ancien sprite par le nouveau
+      // On ajoute le Pokémon suivant suite à la mort de l'actuel
       const spriteData = enemySprites[(state.level - 1) % enemySprites.length];
       createAnimatedEnemySprite(spriteData).then(sprite => {
         state.enemy.removeChildren();
@@ -229,7 +229,6 @@ export async function startGame(host) {
         addHealthBar(state.enemy);
       });
     }
-
     if (state.healthBarFill) {
       const ratio = Math.max(0, state.enemyHP / state.enemyMaxHP);
       state.healthBarFill.clear();
@@ -237,7 +236,6 @@ export async function startGame(host) {
       state.healthBarFill.drawRect(-state.healthBarWidth / 2, 60, state.healthBarWidth * ratio, 12);
       state.healthBarFill.endFill();
     }
-
     updateHUD();
     updateTextLabels();
   }
@@ -246,7 +244,7 @@ export async function startGame(host) {
   enemyContainer.on('pointerdown', () => {
     if (state.isPaused) return;
 
-    // Pas de bonus actif => clic normal
+    // Si on a pas de bonus actif => clic normal
     if (!state.upgrades.activeBonus) {
       const dmg = dmgPerClick();
       applyDamage(dmg);
@@ -300,7 +298,7 @@ export async function startGame(host) {
         }
       }
     } else {
-      // Si l'on relâche avant les 2s → clic normal
+      // Si l'on relâche avant les 2s => clic normal
       const dmg = dmgPerClick();
       applyDamage(dmg);
       enemyContainer.scale.set(state.enemy.baseScale * 0.98);
@@ -316,7 +314,6 @@ export async function startGame(host) {
         }
       }
     }
-
     cancelCharge();
   });
 
@@ -367,12 +364,8 @@ export async function startGame(host) {
   [hpLabel, lvlLabel, scoreLabel].forEach(t => t.anchor.set(0.5));
   app.stage.addChild(hpLabel, lvlLabel, scoreLabel, goldContainer);
 
-  // Rajout de la boutique sur le canvas
   createShopUI(app);
-
   updateTextLabels();
-  //centerEnemy();
-
 
   // Boucle principale du jeu
   app.ticker.add(() => {
@@ -380,7 +373,6 @@ export async function startGame(host) {
 
     const t = app.ticker.lastTime / 1000;
     const k = 10 + 6 * Math.sin(t * 2);
-    //drawEnemy(g, k);
     positionTextLabels();
 
     // Progression visuelle de la charge
