@@ -487,18 +487,6 @@ function animateLabelZoom(label, { startScale = 1, endScale = 1.3, duration = 25
   requestAnimationFrame(tick);
 }
 
-// // Dessin de l'ennemi et centrage sur le canvas
-// function drawEnemy(g, radius = 120) {
-//   g.clear();
-//   g.beginFill(0xf87171);
-//   g.drawCircle(0, 0, radius); // centré sur (0,0)
-//   g.endFill();
-
-//   const pct = Math.max(0, state.enemyHP) / state.enemyMaxHP;
-//   g.lineStyle(8, 0x10b981, 1);
-//   g.arc(0, 0, radius + 14, -Math.PI / 2, -Math.PI / 2 + pct * Math.PI * 2);
-// }
-
 function createAnimatedEnemySprite({ path, frames }) {
   const texture = PIXI.Texture.from(path);
   const baseTexture = texture.baseTexture;
@@ -527,11 +515,3 @@ function createAnimatedEnemySprite({ path, frames }) {
   });
 }
 
-
-function centerEnemy() {
-  if (!state.app || !state.enemy) return;
-  state.enemy.x = state.app.renderer.width / 2;
-  state.enemy.y = state.app.renderer.height / 2;
-  drawEnemy(state.enemy.children[0]);
-  positionTextLabels();
-}
